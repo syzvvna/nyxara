@@ -378,6 +378,90 @@ body.calm .nyx-x {
 }
 
 /* ------------------------------------------------------------
+   radial menu — six frequencies on the left edge
+   ------------------------------------------------------------ */
+
+.radial-menu {
+  position: absolute;
+  left: clamp(18px, 4vw, 64px);
+  top: 50%;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.radial-item {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(calc(var(--ax) - 28px), calc(var(--ay) - 50%));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.7s ease var(--d, 0ms),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms),
+    filter 0.35s ease;
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+
+.radial-menu.visible .radial-item {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(var(--ax), calc(var(--ay) - 50%));
+}
+
+.radial-name {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(11px, 1.5vw, 15px);
+  letter-spacing: 0.14em;
+  color: rgba(190, 184, 205, 0.34);
+  transition: color 0.35s ease, text-shadow 0.35s ease;
+}
+
+.radial-coords {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.24em;
+  color: rgba(160, 152, 180, 0.22);
+  transition: color 0.35s ease;
+}
+
+.radial-item:hover .radial-name,
+.radial-item.active .radial-name {
+  color: var(--c);
+  text-shadow: 0 0 16px var(--c), 0 0 40px var(--c);
+}
+
+.radial-item:hover .radial-coords,
+.radial-item.active .radial-coords {
+  color: var(--c);
+}
+
+.radial-item.active::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 10px var(--c);
+  transform: translateY(-50%);
+}
+
+@media (max-width: 640px) {
+  .radial-menu {
+    left: 12px;
+  }
+  .radial-item {
+    padding: 6px 8px;
+  }
+}
+
+/* ------------------------------------------------------------
    cursor
    ------------------------------------------------------------ */
 
