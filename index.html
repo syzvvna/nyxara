@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#06040e" />
+  <meta name="description" content="NYXARA — the night has coordinates. Six frequencies. All playing now." />
+  <title>NYXARA — the night has coordinates</title>
+  <link rel="icon" href="data:," />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Unbounded:wght@900&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <!-- boot splash: pure CSS, removed by main.js once modules are live -->
+  <div id="boot">
+    <div class="boot-sigil"></div>
+    <div class="boot-text">locating signal</div>
+  </div>
+
+  <!-- WebGL stage -->
+  <canvas id="stage"></canvas>
+
+  <!-- scene overlays mount here -->
+  <div id="ui-root"></div>
+
+  <!-- atmosphere layers -->
+  <div id="fx-rgb-r" class="fx" aria-hidden="true"></div>
+  <div id="fx-rgb-b" class="fx" aria-hidden="true"></div>
+  <div id="fx-vignette" class="fx" aria-hidden="true"></div>
+  <div id="fx-scanlines" class="fx" aria-hidden="true"></div>
+  <div id="fx-strobe" class="fx" aria-hidden="true"></div>
+
+  <!-- custom cursor -->
+  <div id="cursor" aria-hidden="true"></div>
+
+  <noscript>
+    <div class="noscript">NYXARA needs JavaScript. The night stays closed.</div>
+  </noscript>
+
+  <!-- Three.js r128 via CDN, vendored fallback for offline / blocked CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    if (!window.THREE) {
+      document.write('<script src="assets/vendor/three.r128.min.js"><\/script>');
+    }
+  </script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+/* ============================================================
+   NYXARA — base layer
+   the night has coordinates
+   ============================================================ */
+
+:root {
+  --accent: #8b5cf6;
+  --bg: #06040e;
+  --font-display: 'Unbounded', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  cursor: none;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  color: #e8e4f0;
+  font-family: var(--font-mono);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+/* ------------------------------------------------------------
+   stage
+   ------------------------------------------------------------ */
+
+#stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+  transition: filter 1.2s ease;
+}
+
+#ui-root {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+#ui-root > * {
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------
+   boot splash
+   ------------------------------------------------------------ */
+
+#boot {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  transition: opacity 0.9s ease;
+}
+
+#boot.gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot-sigil {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(139, 92, 246, 0.55);
+  transform: rotate(45deg);
+  position: relative;
+  animation: boot-spin 3.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.boot-sigil::after {
+  content: '';
+  position: absolute;
+  inset: 9px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  animation: boot-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes boot-spin {
+  0%   { transform: rotate(45deg) scale(1); }
+  50%  { transform: rotate(225deg) scale(0.86); }
+  100% { transform: rotate(405deg) scale(1); }
+}
+
+@keyframes boot-pulse {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 1; }
+}
+
+.boot-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: rgba(139, 92, 246, 0.7);
+  animation: boot-pulse 1.6s ease-in-out infinite;
+}
+
+.noscript {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #000;
+  color: #8b5cf6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  letter-spacing: 0.2em;
+}
+
+/* ------------------------------------------------------------
+   atmosphere layers
+   ------------------------------------------------------------ */
+
+.fx {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+#fx-scanlines {
+  z-index: 90;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(255, 255, 255, 0.03) 2px,
+    rgba(255, 255, 255, 0.03) 3px
+  );
+  mix-blend-mode: overlay;
+}
+
+#fx-vignette {
+  z-index: 88;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 55%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+#fx-rgb-r,
+#fx-rgb-b {
+  z-index: 86;
+  opacity: 0;
+  mix-blend-mode: screen;
+  transition: opacity 1.4s ease;
+}
+
+#fx-rgb-r {
+  background: radial-gradient(
+    ellipse 120% 90% at 30% 50%,
+    rgba(255, 0, 60, 0.05),
+    transparent 60%
+  );
+}
+
+#fx-rgb-b {
+  background: radial-gradient(
+    ellipse 120% 90% at 70% 50%,
+    rgba(0, 120, 255, 0.05),
+    transparent 60%
+  );
+}
+
+body.in-venue #fx-rgb-r {
+  opacity: 1;
+  animation: rgb-drift-r 9s ease-in-out infinite alternate;
+}
+
+body.in-venue #fx-rgb-b {
+  opacity: 1;
+  animation: rgb-drift-b 11s ease-in-out infinite alternate;
+}
+
+@keyframes rgb-drift-r {
+  0%   { transform: translate(-6px, 2px); }
+  100% { transform: translate(7px, -3px); }
+}
+
+@keyframes rgb-drift-b {
+  0%   { transform: translate(6px, -2px); }
+  100% { transform: translate(-7px, 3px); }
+}
+
+#fx-strobe {
+  z-index: 92;
+  background: #fff;
+  opacity: 0;
+}
+
+body.calm #fx-rgb-r,
+body.calm #fx-rgb-b,
+body.calm #fx-strobe {
+  animation: none;
+  opacity: 0 !important;
+}
+
+/* ------------------------------------------------------------
+   cursor
+   ------------------------------------------------------------ */
+
+#cursor {
+  position: fixed;
+  z-index: 400;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent), 0 0 3px #fff inset;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transition: transform 0.18s ease, background 0.6s ease, box-shadow 0.6s ease;
+  will-change: left, top;
+}
+
+#cursor.over {
+  transform: scale(2.4);
+}
+
+#cursor.down {
+  transform: scale(0.6);
+}
+
+@media (pointer: coarse) {
+  #cursor {
+    display: none;
+  }
+}
