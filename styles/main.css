@@ -462,6 +462,131 @@ body.calm .nyx-x {
 }
 
 /* ------------------------------------------------------------
+   intro
+   ------------------------------------------------------------ */
+
+.intro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.85s ease;
+}
+
+.intro.visible {
+  opacity: 1;
+}
+
+.intro-line {
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 1.8vw, 16px);
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  color: rgba(225, 218, 240, 0.85);
+  text-shadow: 0 0 24px rgba(139, 92, 246, 0.5);
+  text-align: center;
+  padding: 0 24px;
+}
+
+/* ------------------------------------------------------------
+   HUD
+   ------------------------------------------------------------ */
+
+.hud {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(20px, 5vh, 48px);
+  transform: translateX(-50%) translateY(14px);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  max-width: min(86vw, 620px);
+  --c: #8b5cf6;
+}
+
+.hud.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.hud-tag {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.32em;
+  color: rgba(200, 192, 218, 0.38);
+  margin-bottom: 10px;
+  min-height: 1em;
+}
+
+.hud-city {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(26px, 5.4vw, 54px);
+  letter-spacing: 0.1em;
+  line-height: 1;
+  color: var(--c);
+  text-shadow: 0 0 28px var(--c), 0 0 80px var(--c);
+  min-height: 1em;
+}
+
+.hud-coords {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: clamp(10px, 1.3vw, 12px);
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  color: rgba(222, 215, 238, 0.62);
+  min-height: 1em;
+}
+
+.hud-lore {
+  margin-top: 9px;
+  font-family: var(--font-mono);
+  font-size: clamp(9px, 1.1vw, 11px);
+  letter-spacing: 0.12em;
+  line-height: 1.75;
+  color: rgba(195, 187, 214, 0.46);
+  min-height: 1em;
+}
+
+/* ------------------------------------------------------------
+   CALM toggle
+   ------------------------------------------------------------ */
+
+.calm-toggle {
+  position: absolute;
+  top: clamp(16px, 3.5vh, 30px);
+  right: clamp(16px, 3vw, 34px);
+  pointer-events: auto;
+  background: rgba(8, 6, 14, 0.55);
+  border: 1px solid rgba(180, 168, 210, 0.22);
+  color: rgba(205, 197, 226, 0.55);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+  padding: 9px 13px 9px 15px;
+  border-radius: 2px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.calm-toggle:hover {
+  color: #efeaff;
+  border-color: rgba(220, 210, 245, 0.55);
+}
+
+.calm-toggle.on {
+  color: #0a0812;
+  background: rgba(225, 218, 244, 0.92);
+  border-color: transparent;
+  box-shadow: 0 0 18px rgba(225, 218, 244, 0.35);
+}
+
+/* ------------------------------------------------------------
    cursor
    ------------------------------------------------------------ */
 
