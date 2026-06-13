@@ -118,7 +118,7 @@ assert.equal(app.calm, true);
 assert.ok(document.body.classList.contains('calm'), 'body.calm set');
 assert.equal(app.venue.calm, true, 'venue damped');
 assert.equal(app.venue.crowd.calm, 0.35, 'crowd damped');
-assert.equal(app.calmBtn.textContent, 'CALM · ON');
+assert.equal(app.calmBtn.textContent, '▶ MOTION');
 app.calmBtn.dispatch('click');
 assert.equal(app.calm, false, 'calm toggles back');
 

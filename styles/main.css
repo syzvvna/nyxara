@@ -300,6 +300,12 @@ body.calm #fx-strobe {
   color: rgba(170, 158, 200, 0.40);
 }
 
+.const-ui.returning .nyx-title,
+.const-ui.returning .nyx-sub,
+.const-ui.returning .nyx-whisper {
+  display: none;
+}
+
 /* ------------------------------------------------------------
    the door
    ------------------------------------------------------------ */
@@ -584,6 +590,35 @@ body.calm .nyx-x {
   background: rgba(225, 218, 244, 0.92);
   border-color: transparent;
   box-shadow: 0 0 18px rgba(225, 218, 244, 0.35);
+}
+
+/* ------------------------------------------------------------
+   home button
+   ------------------------------------------------------------ */
+
+.home-btn {
+  position: absolute;
+  top: clamp(16px, 3.5vh, 30px);
+  left: clamp(16px, 3vw, 34px);
+  pointer-events: none;
+  background: none;
+  border: none;
+  color: rgba(205, 197, 226, 1);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  padding: 6px 0;
+}
+
+body.in-venue .home-btn {
+  pointer-events: auto;
+  opacity: 0.4;
+}
+
+.home-btn:hover {
+  opacity: 1 !important;
 }
 
 /* ------------------------------------------------------------

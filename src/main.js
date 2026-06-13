@@ -32,6 +32,7 @@ export class App {
     this.calm = false;
     this._timer = null;
     this._autoDescend = false;
+    this._homeReturn = false;
     this._scrambles = new Set();
 
     const canvas = document.getElementById('stage');
@@ -67,6 +68,7 @@ export class App {
 
     this._buildIntro();
     this._buildHud();
+    this._buildHomeBtn();
     this._initCursor();
 
     this.constellation.onEnter = () => this.enterNight();
@@ -116,10 +118,26 @@ export class App {
 
     this.calmBtn = document.createElement('button');
     this.calmBtn.className = 'calm-toggle';
-    this.calmBtn.textContent = 'CALM';
+    this.calmBtn.textContent = '⏸ MOTION';
     this.calmBtn.setAttribute('aria-pressed', 'false');
+    this.calmBtn.setAttribute('title', 'pause all motion & effects');
     this.calmBtn.addEventListener('click', () => this.setCalm(!this.calm));
     this._mount().appendChild(this.calmBtn);
+  }
+
+  _buildHomeBtn() {
+    this.homeBtn = document.createElement('button');
+    this.homeBtn.className = 'home-btn';
+    this.homeBtn.textContent = 'NYX/ARA';
+    this.homeBtn.addEventListener('click', () => this._returnHome());
+    this._mount().appendChild(this.homeBtn);
+  }
+
+  _returnHome() {
+    if (this.state !== 'VENUE') return;
+    this._homeReturn = true;
+    this.pendingCity = this.cityIndex;
+    this.setState('ASCENDING');
   }
 
   _initCursor() {
@@ -135,7 +153,7 @@ export class App {
     });
     document.addEventListener('mouseover', (e) => {
       if (!this.cursorEl || !e.target || !e.target.closest) return;
-      const hot = e.target.closest('.nyx-door, .radial-item, .calm-toggle');
+      const hot = e.target.closest('.nyx-door, .radial-item, .calm-toggle, .home-btn');
       this.cursorEl.classList.toggle('over', !!hot);
     });
     document.addEventListener('pointerdown', () => {
@@ -257,7 +275,13 @@ export class App {
         this.venue.hide();
         this.descent.playReverse(() => {
           this.cityIndex = this.pendingCity;
-          this._autoDescend = true;
+          if (this._homeReturn) {
+            this._homeReturn = false;
+            this._autoDescend = false;
+            this.constellation.setTint('#7c3aed');
+          } else {
+            this._autoDescend = true;
+          }
           this.setState('CONSTELLATION');
         });
         break;
@@ -285,7 +309,7 @@ export class App {
     this.calm = on;
     document.body.classList.toggle('calm', on);
     this.venue.setCalm(on);
-    this.calmBtn.textContent = on ? 'CALM · ON' : 'CALM';
+    this.calmBtn.textContent = on ? '▶ MOTION' : '⏸ MOTION';
     this.calmBtn.setAttribute('aria-pressed', String(on));
     this.calmBtn.classList.toggle('on', on);
   }

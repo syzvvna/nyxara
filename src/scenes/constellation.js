@@ -106,6 +106,7 @@ export class ConstellationScene {
     this.camera = camera;
     this.onEnter = null;
     this.visible = false;
+    this._firstVisit = true;
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color('#030208');
@@ -276,8 +277,10 @@ export class ConstellationScene {
     }
     if (this.ui) {
       this.door.classList.remove('opening');
+      this.ui.classList.toggle('returning', !this._firstVisit);
       this.ui.classList.add('visible');
     }
+    this._firstVisit = false;
   }
 
   hide() {
