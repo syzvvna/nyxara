@@ -31,7 +31,27 @@ const RIM_SCALE = 1.06;
 // per body type and cached. Not a cylinder. Not a sphere.
 // ------------------------------------------------------------
 
-function humanBodyShape(p) {
+// Appends an elliptical arc as `pieces` quadratic beziers. The shape's pen
+// must already sit at angle `from`. Quadratics keep curve density under our
+// control independent of the extrude's global curveSegments.
+function ellipseArc(shape, cx, cy, rx, ry, from, to, pieces) {
+  const step = (to - from) / pieces;
+  for (let i = 0; i < pieces; i++) {
+    const a0 = from + step * i;
+    const a1 = a0 + step;
+    const mid = (a0 + a1) / 2;
+    const half = Math.abs(a1 - a0) / 2;
+    const k = 1 / Math.cos(half); // tangent-intersection control point
+    shape.quadraticCurveTo(
+      cx + rx * Math.cos(mid) * k,
+      cy + ry * Math.sin(mid) * k,
+      cx + rx * Math.cos(a1),
+      cy + ry * Math.sin(a1)
+    );
+  }
+}
+
+function humanBodyShape(p, headPieces = 4) {
   const { sw, ww, hw, hs, ht } = p;
 
   const headR = hs;
@@ -74,8 +94,8 @@ function humanBodyShape(p) {
   s.lineTo(-neckHW * 0.94, jawY + 0.006);
   s.quadraticCurveTo(-neckHW * 0.9, jawY + 0.01, -jawX, jawY);
 
-  // — head: slightly tall ellipse, drawn over the crown —
-  s.absellipse(0, headCY, headR * 0.88, headR, Math.PI - jawA, jawA, true, 0);
+  // — head: slightly tall ellipse traced jaw → crown → jaw —
+  ellipseArc(s, 0, headCY, headR * 0.88, headR, Math.PI + jawA, -jawA, headPieces);
 
   // — right jaw, neck, trapezius, deltoid —
   s.quadraticCurveTo(neckHW * 0.9, jawY + 0.01, neckHW * 0.94, jawY + 0.006);
@@ -104,7 +124,7 @@ function humanBodyShape(p) {
   return s;
 }
 
-function armShape(p) {
+function armShape(p, capPieces = 2) {
   const { sw, ht } = p;
   const aw = 0.030 + sw * 0.085;          // upper-arm half width
   const len = ht * 0.40;
@@ -118,7 +138,7 @@ function armShape(p) {
   const s = new THREE.Shape();
   // shoulder cap over the pivot at (0,0)
   s.moveTo(-aw, 0);
-  s.absarc(0, 0, aw, Math.PI, 0, true);
+  ellipseArc(s, 0, 0, aw, aw, Math.PI, 0, capPieces);
   // outer edge → elbow → wrist
   s.quadraticCurveTo(aw + 0.006, elbowY * 0.55, bend + elbowW, elbowY);
   s.quadraticCurveTo(bend + elbowW * 0.8, (elbowY + wristY) / 2, wristX + wristW, wristY);
@@ -142,18 +162,27 @@ function geometryFor(typeName) {
   const p = BODY_TYPES[typeName];
   const depth = 0.085 + p.ww * 0.30;
 
-  const bodyGeo = new THREE.ExtrudeGeometry(humanBodyShape(p), {
+  const bodyGeo = new THREE.ExtrudeGeometry(humanBodyShape(p, 4), {
     steps: 1,
     depth,
     bevelEnabled: true,
     bevelThickness: 0.012,
     bevelSize: 0.012,
     bevelSegments: 1,
-    curveSegments: 6,
+    curveSegments: 4,
   });
   bodyGeo.translate(0, -p.ht / 2, -depth / 2); // centre for clean rim scaling
 
-  const arm = armShape(p);
+  // the rim is a soft halo — it can afford far fewer vertices
+  const bodyGeoLo = new THREE.ExtrudeGeometry(humanBodyShape(p, 3), {
+    steps: 1,
+    depth,
+    bevelEnabled: false,
+    curveSegments: 2,
+  });
+  bodyGeoLo.translate(0, -p.ht / 2, -depth / 2);
+
+  const arm = armShape(p, 2);
   const armDepth = depth * 0.52;
   const armGeo = new THREE.ExtrudeGeometry(arm.shape, {
     steps: 1,
@@ -162,14 +191,25 @@ function geometryFor(typeName) {
     bevelThickness: 0.008,
     bevelSize: 0.008,
     bevelSegments: 1,
-    curveSegments: 5,
+    curveSegments: 3,
   });
   armGeo.translate(0, 0, -armDepth / 2);
+
+  const armLo = armShape(p, 2);
+  const armGeoLo = new THREE.ExtrudeGeometry(armLo.shape, {
+    steps: 1,
+    depth: armDepth,
+    bevelEnabled: false,
+    curveSegments: 2,
+  });
+  armGeoLo.translate(0, 0, -armDepth / 2);
 
   const neckBaseY = p.ht - p.hs * 1.04 - Math.sin(0.92) * p.hs - p.hs * 0.40;
   const entry = {
     bodyGeo,
+    bodyGeoLo,
     armGeo,
+    armGeoLo,
     ht: p.ht,
     shoulderX: p.sw / 2 - arm.aw * 0.45,
     shoulderY: neckBaseY - 0.012,
@@ -239,7 +279,7 @@ export class CrowdSystem {
   }
 
   _buildFigure(typeName, x, z, ringIdx) {
-    const { bodyGeo, armGeo, ht, shoulderX, shoulderY } = geometryFor(typeName);
+    const { bodyGeo, bodyGeoLo, armGeo, armGeoLo, ht, shoulderX, shoulderY } = geometryFor(typeName);
     const detailed = ringIdx < 2; // inner rings get rim-lit arms too
 
     const group = new THREE.Group();
@@ -256,7 +296,7 @@ export class CrowdSystem {
     body.position.y = ht / 2;
     wrap.add(body);
 
-    const rim = new THREE.Mesh(bodyGeo, this.rimMat);
+    const rim = new THREE.Mesh(bodyGeoLo, this.rimMat);
     rim.position.y = ht / 2;
     rim.scale.setScalar(RIM_SCALE);
     wrap.add(rim);
@@ -275,10 +315,10 @@ export class CrowdSystem {
     wrap.add(rPivot);
 
     if (detailed) {
-      const lRim = new THREE.Mesh(armGeo, this.rimMat);
+      const lRim = new THREE.Mesh(armGeoLo, this.rimMat);
       lRim.scale.setScalar(RIM_SCALE);
       lPivot.add(lRim);
-      const rRim = new THREE.Mesh(armGeo, this.rimMat);
+      const rRim = new THREE.Mesh(armGeoLo, this.rimMat);
       rRim.scale.set(-RIM_SCALE, RIM_SCALE, RIM_SCALE);
       rPivot.add(rRim);
     }
@@ -352,7 +392,7 @@ export class CrowdSystem {
 // builds a single standalone figure (the DJ on the booth)
 export function buildLoneFigure(cityColor, typeName = 'tall-slim') {
   const sys = { bodyMat: null, rimMat: null };
-  const { bodyGeo, armGeo, ht, shoulderX, shoulderY } = geometryFor(typeName);
+  const { bodyGeo, bodyGeoLo, armGeo, ht, shoulderX, shoulderY } = geometryFor(typeName);
 
   sys.bodyMat = new THREE.MeshStandardMaterial({
     color: 0x0b0b11,
@@ -367,7 +407,7 @@ export function buildLoneFigure(cityColor, typeName = 'tall-slim') {
   const body = new THREE.Mesh(bodyGeo, sys.bodyMat);
   body.position.y = ht / 2;
   group.add(body);
-  const rim = new THREE.Mesh(bodyGeo, sys.rimMat);
+  const rim = new THREE.Mesh(bodyGeoLo, sys.rimMat);
   rim.position.y = ht / 2;
   rim.scale.setScalar(RIM_SCALE);
   group.add(rim);
